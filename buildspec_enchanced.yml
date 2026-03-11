@@ -1,0 +1,53 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: eu-west-2
+    IMAGE_REPO_NAME: flask-app
+    CONTAINER_NAME: flask-app
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo Installing dependencies and security scanner
+      - pip install flask pytest
+      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+  pre_build:
+    commands:
+      - echo ===== RUNNING UNIT TESTS =====
+      - cd app && python -m pytest tests/ -v --junitxml=../test-results.xml
+      - cd ..
+      - echo All tests passed
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+
+  build:
+    commands:
+      - echo ===== BUILDING DOCKER IMAGE =====
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $ECR_REGISTRY/$IMAGE_REPO_NAME:latest
+
+  post_build:
+    commands:
+      - echo ===== PUSHING IMAGE =====
+      - docker push $ECR_REGISTRY/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push $ECR_REGISTRY/$IMAGE_REPO_NAME:latest
+      - echo ===== SECURITY SCAN =====
+      - trivy image --exit-code 0 --severity HIGH,CRITICAL $ECR_REGISTRY/$IMAGE_REPO_NAME:latest
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $ECR_REGISTRY/$IMAGE_REPO_NAME:latest > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+    - test-results.xml
+
+reports:
+  pytest_reports:
+    files:
+      - test-results.xml
+    file-format: JUNITXML
