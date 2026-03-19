@@ -3,6 +3,7 @@ version: 0.2
 env:
   variables:
     AWS_DEFAULT_REGION: eu-west-2
+    ECR_REGISTRY: 110044886839.dkr.ecr.eu-west-2.amazonaws.com
     IMAGE_REPO_NAME: flask-app
     CONTAINER_NAME: flask-app
 
