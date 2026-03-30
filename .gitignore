@@ -1,0 +1,17 @@
+# Claude Code files
+.claude/
+CLAUDE.md
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# AWS credentials (never commit these)
+.aws/
+
+# Experiment output files
+*.csv
