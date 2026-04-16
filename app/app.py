@@ -11,7 +11,7 @@ def health_check():
 @app.route('/items', methods=['GET'])
 def get_items():
     items = [
-        {'id': 1, 'name': 'Item One', 'value': 118},
+        {'id': 1, 'name': 'Item One', 'value': 100},
         {'id': 2, 'name': 'Item Two', 'value': 200},
     ]
     return jsonify({'items': items, 'count': len(items)}), 200
@@ -21,7 +21,7 @@ def compute():
     data = request.get_json()
     if not data or 'value' not in data:
         return jsonify({'error': 'Missing value parameter'}), 400
-    result = data['value'] * 3
+    result = data['value'] * 2
     return jsonify({'input': data['value'], 'result': result}), 200
 
 if __name__ == '__main__':
