@@ -21,7 +21,7 @@ def compute():
     data = request.get_json()
     if not data or 'value' not in data:
         return jsonify({'error': 'Missing value parameter'}), 400
-    result = data['value'] * 2
+    result = data['value'] * 3
     return jsonify({'input': data['value'], 'result': result}), 200
 
 if __name__ == '__main__':
