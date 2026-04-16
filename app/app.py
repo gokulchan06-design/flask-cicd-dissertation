@@ -11,7 +11,7 @@ def health_check():
 @app.route('/items', methods=['GET'])
 def get_items():
     items = [
-        {'id': 1, 'name': 'Item One', 'value': 108},
+        {'id': 1, 'name': 'Item One', 'value': 109},
         {'id': 2, 'name': 'Item Two', 'value': 200},
     ]
     return jsonify({'items': items, 'count': len(items)}), 200
